@@ -17,6 +17,7 @@ client.once("ready", () => {
   console.log(`ล็อกอินแล้ว ${client.user.tag}`);
 
   const channel = client.channels.cache.get("1248950710331113542");
+
   if (!channel) {
     console.log("หา Voice Channel ไม่เจอ");
     return;
