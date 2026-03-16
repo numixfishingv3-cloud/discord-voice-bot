@@ -3,10 +3,9 @@ const { joinVoiceChannel, createAudioPlayer, createAudioResource } = require('@d
 const play = require('play-dl');
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates]
 });
 
-let connection;
 let player = createAudioPlayer();
 
 client.once("clientReady", () => {
@@ -17,42 +16,57 @@ client.on("interactionCreate", async interaction => {
 
   if (!interaction.isChatInputCommand()) return;
 
+  // ping
   if (interaction.commandName === "ping") {
-    await interaction.reply("🏓 Pong!");
+    await interaction.reply("🏓 Pong! บอททำงานอยู่");
   }
 
+  // play
   if (interaction.commandName === "play") {
 
     await interaction.deferReply();
 
-    const url = interaction.options.getString("ลิงก์");
+    const url = interaction.options.getString("url");
     const voiceChannel = interaction.member.voice.channel;
 
     if (!voiceChannel) {
-      return interaction.reply("❌ คุณต้องอยู่ใน Voice ก่อน");
+      return interaction.editReply("❌ คุณต้องอยู่ใน Voice Channel ก่อน");
     }
 
-    connection = joinVoiceChannel({
-      channelId: voiceChannel.id,
-      guildId: voiceChannel.guild.id,
-      adapterCreator: voiceChannel.guild.voiceAdapterCreator
-    });
+    try {
 
-    const stream = await play.stream(url);
+      const connection = joinVoiceChannel({
+        channelId: voiceChannel.id,
+        guildId: voiceChannel.guild.id,
+        adapterCreator: voiceChannel.guild.voiceAdapterCreator
+      });
 
-    const resource = createAudioResource(stream.stream, {
-      inputType: stream.type
-    });
+      const stream = await play.stream(url);
 
-    player.play(resource);
-    connection.subscribe(player);
+      const resource = createAudioResource(stream.stream, {
+        inputType: stream.type
+      });
 
-    interaction.reply("🎵 กำลังเล่นเพลง");
+      player.play(resource);
+      connection.subscribe(player);
+
+      interaction.editReply("🎵 กำลังเล่นเพลง");
+
+    } catch (error) {
+
+      console.log(error);
+      interaction.editReply("❌ เล่นเพลงไม่ได้");
+
+    }
+
   }
 
+  // stop
   if (interaction.commandName === "stop") {
+
     player.stop();
     interaction.reply("⏹ หยุดเพลงแล้ว");
+
   }
 
 });
