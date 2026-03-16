@@ -6,7 +6,7 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates]
 });
 
-let player = createAudioPlayer();
+const player = createAudioPlayer();
 
 client.once("clientReady", () => {
   console.log(`Logged in as ${client.user.tag}`);
@@ -18,20 +18,25 @@ client.on("interactionCreate", async interaction => {
 
   // ping
   if (interaction.commandName === "ping") {
-    await interaction.reply("🏓 Pong! บอททำงานอยู่");
+    return interaction.reply("🏓 Pong! บอททำงานอยู่");
   }
 
   // play
   if (interaction.commandName === "play") {
 
-    await interaction.deferReply();
-
     const url = interaction.options.getString("url");
+
+    if (!url) {
+      return interaction.reply("❌ กรุณาใส่ลิงก์ YouTube");
+    }
+
     const voiceChannel = interaction.member.voice.channel;
 
     if (!voiceChannel) {
-      return interaction.editReply("❌ คุณต้องอยู่ใน Voice Channel ก่อน");
+      return interaction.reply("❌ คุณต้องอยู่ใน Voice Channel ก่อน");
     }
+
+    await interaction.deferReply();
 
     try {
 
